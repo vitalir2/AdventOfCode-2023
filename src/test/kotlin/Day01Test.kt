@@ -1,3 +1,4 @@
+import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.ints.shouldBeExactly
 
@@ -23,6 +24,49 @@ class Day01Test : FreeSpec({
             treb7uchet
         """.trimIndent().lines()
             Day01.part1(input) shouldBeExactly 142
+        }
+    }
+
+    "part 2" - {
+        "cannot be empty" {
+            val input = emptyList<String>()
+            shouldThrowAny { Day01.part2(input) }
+        }
+        "one line" {
+            val input = listOf(
+                "helltwooofour",
+            )
+            Day01.part2(input) shouldBeExactly 24
+        }
+        "one line with single number" {
+            val input = listOf(
+                "sweeeightt",
+            )
+            Day01.part2(input) shouldBeExactly 88
+        }
+        "one line with many possible digits with spelling" {
+            val input = listOf(
+                "eightwothree",
+            )
+            Day01.part2(input) shouldBeExactly 83
+        }
+        "one line with many possible digits in different forms" {
+            val input = listOf(
+                "eighthree9",
+            )
+            Day01.part2(input) shouldBeExactly 89
+        }
+        "test input (many lines)" {
+            val input = """
+                two1nine
+                eightwothree
+                abcone2threexyz
+                xtwone3four
+                4nineeightseven2
+                zoneight234
+                7pqrstsixteen
+            """.trimIndent().lines()
+            Day01.part2(input) shouldBeExactly 281
         }
     }
 })
