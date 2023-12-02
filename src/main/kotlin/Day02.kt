@@ -14,14 +14,20 @@ object Day02 : Challenge<Int>(day = 2) {
             .sumOf { game -> findGameValue(elfBag, game) }
     }
 
+    override fun solveSecondPart(input: List<String>): Int {
+        return input
+            .asSequence()
+            .map(::parseGame)
+            .map(ElfBag.Companion::findRequiredSizeFromGame)
+            .map(ElfBag::maxCubesDisplay)
+            .map(CubesDisplay::power)
+            .sum()
+    }
+
     private fun findGameValue(elfBag: ElfBag, game: Game): Int = if (elfBag.isGamePossible(game)) {
         game.number
     } else {
         0
-    }
-
-    override fun solveSecondPart(input: List<String>): Int {
-        return 0
     }
 
     private fun parseGame(string: String): Game {
@@ -68,6 +74,25 @@ private class ElfBag(
             display.getCubesCount(color) <= maxCubesDisplay.getCubesCount(color)
         }
     }
+
+    companion object {
+        fun findRequiredSizeFromGame(game: Game): ElfBag {
+            return ElfBag(
+                maxCubesDisplay = CubeDisplayColor.entries.associateWith { color ->
+                    findRequiredSizeForColor(game, color)
+                },
+            )
+        }
+
+        private fun findRequiredSizeForColor(
+            game: Game,
+            color: CubeDisplayColor,
+        ): Int {
+            return game.cubesDisplays.maxOf { cubesDisplay ->
+                cubesDisplay.getCubesCount(color)
+            }
+        }
+    }
 }
 
 private typealias CubeDisplay = Pair<CubeDisplayColor, Int>
@@ -87,6 +112,12 @@ private enum class CubeDisplayColor(val colorName: String) {
 
 private fun CubesDisplay.getCubesCount(color: CubeDisplayColor): Int {
     return getOrDefault(color, 0)
+}
+
+private fun CubesDisplay.power(): Int {
+    return CubeDisplayColor.entries.fold(initial = 1) { product, color ->
+        product * getCubesCount(color)
+    }
 }
 
 fun main() = Day02.executeParts()
