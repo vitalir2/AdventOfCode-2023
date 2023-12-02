@@ -3,9 +3,9 @@ import kotlin.io.path.readLines
 
 abstract class Challenge<T>(private val day: Int) {
 
-    abstract fun solveFirstPart(input: List<String>): T
+    abstract fun solveFirstPart(input: Input): T
 
-    abstract fun solveSecondPart(input: List<String>): T
+    abstract fun solveSecondPart(input: Input): T
 
     fun part1() = partN(n = 1)
 
@@ -22,7 +22,7 @@ abstract class Challenge<T>(private val day: Int) {
         println(solution)
     }
 
-    private fun readInput(): List<String> {
+    private fun readInput(): Input {
         val dayName = if (day < 10) "0$day" else day.toString()
         return Path("src/main/kotlin/Day$dayName.txt").readLines()
     }

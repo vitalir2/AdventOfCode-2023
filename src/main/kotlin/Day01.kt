@@ -1,10 +1,10 @@
 object Day01 : Challenge<Int>(day = 1) {
-    override fun solveFirstPart(input: List<String>): Int {
+    override fun solveFirstPart(input: Input): Int {
         require(input.isNotEmpty())
         return input.sumOf { line -> line.parseTwoDigitNumberFromChars() }
     }
 
-    override fun solveSecondPart(input: List<String>): Int {
+    override fun solveSecondPart(input: Input): Int {
         require(input.isNotEmpty())
         return input.sumOf { line ->
             parseTwoDigitNumberFromSpellingAndChars(line)
