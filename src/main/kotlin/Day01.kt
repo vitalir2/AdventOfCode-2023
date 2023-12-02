@@ -1,10 +1,10 @@
-object Day01 {
-    fun part1(input: List<String>): Int {
+object Day01 : Challenge<Int>(day = 1) {
+    override fun solveFirstPart(input: List<String>): Int {
         require(input.isNotEmpty())
         return input.sumOf { line -> line.parseTwoDigitNumberFromChars() }
     }
 
-    fun part2(input: List<String>): Int {
+    override fun solveSecondPart(input: List<String>): Int {
         require(input.isNotEmpty())
         return input.sumOf { line ->
             parseTwoDigitNumberFromSpellingAndChars(line)
@@ -78,8 +78,4 @@ enum class Digit(val spelling: String, val character: Char) {
     NINE("nine", '9'),
 }
 
-fun main() {
-    val input = readInput("Day01")
-    Day01.part1(input).println()
-    Day01.part2(input).println()
-}
+fun main() = Day01.executeParts()
