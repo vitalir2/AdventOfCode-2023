@@ -75,5 +75,70 @@ class Day03Test : ChallengeTest<Int>(day = Day03) {
                 part1(input) shouldBeExactly 4361
             }
         }
+
+        "part 2" - {
+            "no stars" {
+                val input = """
+                    123.
+                    ...#
+                """.trimIndent()
+
+                part2(input) shouldBeExactly 0
+            }
+
+            "star but not gear; one adjacent number" {
+                val input = """
+                    123.
+                    ...*
+                """.trimIndent()
+
+                part2(input) shouldBeExactly 0
+            }
+
+            "star but not gear; three adjacent numbers" {
+                val input = """
+                    123.1.
+                    ...*..
+                    ...12.
+                """.trimIndent()
+
+                part2(input) shouldBeExactly 0
+            }
+
+            "symbol and two adjacent numbers = not gear" {
+                val input = """
+                    11..
+                    #2..
+                """.trimIndent()
+
+                part2(input) shouldBeExactly 0
+            }
+
+            "single gear; ratio = product of two adjacent numbers" {
+                val input = """
+                    123*
+                    ..2.
+                """.trimIndent()
+
+                part2(input) shouldBeExactly 246
+            }
+
+            "two gears; result = sum of their ratios; part example" {
+                val input = """
+                    467..114..
+                    ...*......
+                    ..35..633.
+                    ......#...
+                    617*......
+                    .....+.58.
+                    ..592.....
+                    ......755.
+                    ...${'$'}.*....
+                    .664.598..
+                """.trimIndent()
+
+                part2(input) shouldBeExactly 467835
+            }
+        }
     }
 }

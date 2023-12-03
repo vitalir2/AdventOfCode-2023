@@ -9,7 +9,11 @@ object Day03 : Challenge<Int>(day = 3) {
     }
 
     override fun solveSecondPart(input: Input): Int {
-        TODO("Not yet implemented")
+        val schematic = parseSchematic(input)
+        return schematic.rows
+            .flatMap(EngineSchematic.Row::chars)
+            .filterIsInstance<EngineChar.Symbol>()
+            .sumOf { it.gearRatio(schematic) ?: 0 }
     }
 
     private fun parseSchematic(input: Input): EngineSchematic {
@@ -28,7 +32,10 @@ object Day03 : Challenge<Int>(day = 3) {
                 add(parsedChar)
             }
         }
-        return EngineSchematic.Row(chars)
+        return EngineSchematic.Row(
+            id = lineIndex,
+            chars = chars,
+        )
     }
 
     private fun MutableList<EngineChar>.parseEngineChar(
@@ -39,7 +46,11 @@ object Day03 : Challenge<Int>(day = 3) {
         return when {
             char == EngineChar.BLANK_SYMBOL -> EngineChar.Blank
             char.isDigit() -> parseNumberChar(char, indexInRow, row)
-            else -> EngineChar.Symbol(char)
+            else -> EngineChar.Symbol(
+                raw = char,
+                row = row,
+                column = indexInRow,
+            )
         }
     }
 
@@ -89,18 +100,46 @@ class EngineSchematic(
     )
 
     operator fun get(rowIndex: Int, columnIndex: Int): EngineChar {
-        require(rowIndex in 0 until size.height) {
-            "Row index must be between 0 and ${size.height - 1} but was $rowIndex"
-        }
-        require(columnIndex in 0 until size.width) {
-            "Column index must be between 0 and ${size.width - 1} but was $columnIndex"
-        }
+        checkRowIndex(rowIndex)
+        checkColumnIndex(columnIndex)
 
         val row = rows[rowIndex]
         return row[columnIndex]
     }
 
+    fun getAdjacent(rowIndex: Int, columnIndex: Int): List<EngineChar> {
+        checkRowIndex(rowIndex)
+        checkColumnIndex(columnIndex)
+
+        val leftAdj = (columnIndex - 1).coerceAtLeast(0)
+        val rightAdj = (columnIndex + 1).coerceAtMost(size.width - 1)
+        val topAdj = (rowIndex - 1).coerceAtLeast(0)
+        val bottomAdj = (rowIndex + 1).coerceAtMost(size.height - 1)
+        return buildList {
+            for (horIndex in leftAdj..rightAdj) {
+                for (verIndex in topAdj..bottomAdj) {
+                    add(get(rowIndex = verIndex, columnIndex = horIndex))
+                }
+            }
+        }
+            .sortedBy { char -> char.representation }
+            .distinct()
+    }
+
+    private fun checkRowIndex(rowIndex: Int) {
+        require(rowIndex in 0 until size.height) {
+            "Row index must be between 0 and ${size.height - 1} but was $rowIndex"
+        }
+    }
+
+    private fun checkColumnIndex(columnIndex: Int) {
+        require(columnIndex in 0 until size.width) {
+            "Column index must be between 0 and ${size.width - 1} but was $columnIndex"
+        }
+    }
+
     data class Row(
+        val id: Int,
         val chars: List<EngineChar>,
     ) {
 
@@ -124,18 +163,35 @@ class EngineSchematic(
                     index in char.startIndex..char.endIndex
                 }
                 rawChar == EngineChar.BLANK_SYMBOL -> EngineChar.Blank
-                else -> EngineChar.Symbol(rawChar)
+                else -> EngineChar.Symbol(
+                    raw = rawChar,
+                    row = id,
+                    column = index,
+                )
             }
         }
     }
 }
 
 sealed interface EngineChar {
-    data object Blank : EngineChar
-    data class Symbol(val raw: Char) : EngineChar {
+
+    val representation: String
+
+    data object Blank : EngineChar {
+        override val representation: String
+            get() = BLANK_SYMBOL.toString()
+    }
+    data class Symbol(
+        val row: Int,
+        val column: Int,
+        val raw: Char,
+    ) : EngineChar {
         init {
             check(raw != BLANK_SYMBOL)
         }
+
+        override val representation: String
+            get() = raw.toString()
     }
     data class Number(
         val row: Int,
@@ -143,6 +199,9 @@ sealed interface EngineChar {
         val endIndex: Int,
         val value: String,
     ) : EngineChar {
+
+        override val representation: String
+            get() = value
 
         val intValue: Int
             get() {
@@ -171,4 +230,16 @@ sealed interface EngineChar {
     }
 }
 
-fun main() = Day03.part1()
+fun EngineChar.Symbol.gearRatio(schematic: EngineSchematic): Int? {
+    val hasGearSymbol = raw == '*'
+    if (hasGearSymbol.not()) return null
+
+    val adjacentNumbers = schematic.getAdjacent(row, column).filterIsInstance<EngineChar.Number>()
+    return if (adjacentNumbers.size == 2) {
+        adjacentNumbers[0].intValue * adjacentNumbers[1].intValue
+    } else {
+        null
+    }
+}
+
+fun main() = Day03.executeParts()
